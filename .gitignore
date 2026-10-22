@@ -1,0 +1,8 @@
+#vendor
+backend/vendor
+
+#.env
+.env
+
+# schema
+schema.sql
