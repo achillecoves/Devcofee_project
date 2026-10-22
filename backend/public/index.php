@@ -1,9 +1,7 @@
 <?php
 
-use App\Controllers\StationController;
+use App\Controllers\DrinkController;
 use App\Core\Database;
-use App\Middlewares\CorsMiddleware;
-use App\Middlewares\EcoMetricsMiddleware;
 use DI\ContainerBuilder;
 use Dotenv\Dotenv;
 use Slim\Factory\AppFactory;
@@ -25,3 +23,15 @@ $containerBuilder->addDefinitions([
 
 $container = $containerBuilder->build();
 AppFactory::setContainer($container);
+
+$app = AppFactory::create();
+$app->addBodyParsingMiddleware();
+
+$app->options("/{routes:.+}", function ($request, $response){
+  return $response;
+});
+
+$app->get("/api/drinks", [DrinkController::class, "index"]);
+$app->post("/api/drinks", [DrinkController::class, "storeDrink"]);
+
+$app->run();
