@@ -80,4 +80,38 @@ class DrinkController{
       return $response->withHeader("Content-Type", "application/json")->withStatus(201);
 
     }
+
+    public function show(Request $request, Response $response, array $args): Response
+    {
+    $id = (int) $args["id"];
+    $drink = $this->coffeeService->getDrinkById($id);
+
+    if ($drink === null) {
+        return ProblemDetailsResponse::create(
+            response: $response,
+            status: 404,
+            title: "Not Found",
+            detail: "La boisson {$id} n'existe pas."
+        );
+    }
+
+    $baseUrl = UrlHelper::getBaseUrl($request);
+
+    $payload = [
+        "id" => $drink->id,
+        "name" => $drink->name_drink,
+        "caffeineMg" => $drink->caffeine_mg,
+        "volumeMl" => $drink->volume_ml,
+        "_links" => [
+            "self" => [
+                "href" => "{$baseUrl}/api/drinks/{$drink->id}",
+                "method" => "GET"
+            ]
+        ]
+    ];
+
+    $response->getBody()->write(json_encode($payload, JSON_UNESCAPED_SLASHES));
+
+    return $response->withHeader("Content-Type", "application/json")->withStatus(200);
+    }
 }
