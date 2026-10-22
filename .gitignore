@@ -6,3 +6,6 @@ backend/vendor
 
 # schema
 schema.sql
+
+#logs
+logs
