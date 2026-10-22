@@ -62,6 +62,15 @@ class CoffeeService{
 
     }
 
+    public function getDrinkCaffeine(int $drinkId): ?int{
+        $req = $this->pdo->prepare("SELECT caffeine_mg FROM drinks WHERE id = :id");
+        $req->bindValue(":id", $drinkId, PDO::PARAM_INT);
+        $req->execute();
+
+        $value = $req->fetchColumn();
+        return $value === false ? null : (int) $value;
+    }
+
     public function getLastConsumptions(): array{
       $req = $this->pdo->prepare("SELECT drink_id, developer_name, id, consumed_at FROM consumptions ORDER BY id DESC LIMIT 20");
 
