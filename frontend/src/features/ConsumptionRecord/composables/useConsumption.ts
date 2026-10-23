@@ -1,18 +1,6 @@
 import { ref } from 'vue';
-import { ConsumptionRequest, ConsumptionResponse } from '@/types/interfacesConsumptions';
+import type { ConsumptionRequest, ConsumptionResponse } from '@/types/interfacesConsumptions';
 import { useErrorStore } from '@/stores/error';
-export interface ConsumptionRequest {
-    "drinkId": number | null,
-    "developerName": string,
-    "consumedAt": string
-}
-
-export interface ConsumptionResponse {
-    "id": number,
-    "drinkId": number,
-    "developerName": string,
-    "consumedAt": string
-}
 
 export function useConsumption() {
     const urlBase = "http://127.0.0.1:5500/api/"
