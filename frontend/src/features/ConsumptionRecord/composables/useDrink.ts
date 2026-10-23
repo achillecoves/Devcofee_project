@@ -1,10 +1,5 @@
 import { ref } from 'vue';
-export interface Drink {
-    "id": number,
-    "name": string,
-    "caffeineMg": number,
-    "volumeMl": number,
-}
+import { Drink } from '@/types/interfacesDrinks';
 export function useDrinks() {
     const urlBase = "http://127.0.0.1:5500/api/"
     const drinks = ref<Drink[] | null>(null);
