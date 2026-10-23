@@ -1,0 +1,12 @@
+#vendor
+backend/vendor
+
+#.env
+.env
+
+# schema
+schema.sql
+
+#logs
+logs
+src/var/logs/
