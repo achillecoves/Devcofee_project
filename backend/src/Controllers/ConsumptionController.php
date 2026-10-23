@@ -97,10 +97,8 @@ class ConsumptionController
 
     public function deleteConsumption(Request $request, Response $response, array $args): Response
     {
-
         $id = (int) $args["id"];
         $consumption = $this->coffeeService->getConsummptionById($id);
-
 
         if (empty($consumption)) {
             return ProblemDetailsResponse::create(
@@ -111,21 +109,8 @@ class ConsumptionController
             );
         }
 
-        $baseUrl = UrlHelper::getBaseUrl($request);
-        $data = [
-            "id" => $consumption->id,
-            "drinkId" => $consumption->drinkId,
-            "developerName" => $consumption->developerName,
-            "consumedAt" => $consumption->consumedAt,
-            "_links" => [
-                "delete" => [
-                    "href" => "{$baseUrl}/api/consumptions/{$consumption->id}",
-                    "method" => "DELETE"
-                ]
-            ]
-        ];
+        $this->coffeeService->deleteConsumption($id);
 
-        $response->getBody()->write(json_encode($data, JSON_UNESCAPED_SLASHES));
-        return $response->withHeader("Content-Type", "application/json")->withStatus(204);
+        return $response->withStatus(204);
     }
 }

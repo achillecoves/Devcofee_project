@@ -137,4 +137,13 @@ class CoffeeService
 
     return (int) $req->fetchColumn();
   }
+
+  public function deleteConsumption(int $id): bool
+{
+  $req = $this->pdo->prepare("DELETE FROM consumptions WHERE id = :id");
+  $req->bindValue(":id", $id, PDO::PARAM_INT);
+  $req->execute();
+
+  return $req->rowCount() > 0;
+}
 }
