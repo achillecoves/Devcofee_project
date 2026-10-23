@@ -1,119 +1,140 @@
 <?php
+
 namespace App\Services;
 
 use App\Models\Drink;
 use App\Models\Consumption;
 use PDO;
 
-class CoffeeService{
+class CoffeeService
+{
 
-    public function __construct(
-        private PDO $pdo
-    ){}
+  public function __construct(
+    private PDO $pdo
+  ) {}
 
-    public function getAllDrinks()
-    {
+  public function getAllDrinks()
+  {
 
-        $req = $this->pdo->query("SELECT id, name_drink, caffeine_mg, volume_ml FROM drinks");
+    $req = $this->pdo->query("SELECT id, name_drink, caffeine_mg, volume_ml FROM drinks");
 
-        $rows = $req->fetchAll();
+    $rows = $req->fetchAll();
 
-        return array_map(fn($r) => new Drink(
-            (int) $r->id,
-            $r->name_drink,
-            (int) $r->caffeine_mg,
-            (int) $r->volume_ml
-        ), $rows);
-    }
+    return array_map(fn($r) => new Drink(
+      (int) $r->id,
+      $r->name_drink,
+      (int) $r->caffeine_mg,
+      (int) $r->volume_ml
+    ), $rows);
+  }
 
-    public function getDrinkById(int $id): ?Drink
-    {
-      $req = $this->pdo->prepare("SELECT id, name_drink, caffeine_mg, volume_ml FROM drinks WHERE id = :id");
-      $req->bindValue(":id", $id, PDO::PARAM_INT);
-      $req->execute();
+  public function getDrinkById(int $id): ?Drink
+  {
+    $req = $this->pdo->prepare("SELECT id, name_drink, caffeine_mg, volume_ml FROM drinks WHERE id = :id");
+    $req->bindValue(":id", $id, PDO::PARAM_INT);
+    $req->execute();
 
-      $r = $req->fetch();
-      if(!$r) return null;
+    $r = $req->fetch();
+    if (!$r) return null;
 
-      return new Drink(
-        (int) $r->id,
-        $r->name_drink,
-        (int) $r->caffeine_mg,
-        (int) $r->volume_ml
-      );
-    }
+    return new Drink(
+      (int) $r->id,
+      $r->name_drink,
+      (int) $r->caffeine_mg,
+      (int) $r->volume_ml
+    );
+  }
 
-    public function createDrink(string $name_drink, int $caffeine_mg, int $volume_ml): Drink
-    {
-      $req = $this->pdo->prepare("INSERT INTO drinks(name_drink, caffeine_mg, volume_ml) VALUES(:name_drink, :caffeine_mg, :volume_ml)");
-      
-      $req->bindValue(":name_drink", $name_drink, PDO::PARAM_STR);
-      $req->bindValue(":caffeine_mg", $caffeine_mg, PDO::PARAM_INT);
-      $req->bindValue(":volume_ml", $volume_ml, PDO::PARAM_INT);
-      $req->execute();
-      $id = (int) $this->pdo->lastInsertId();
+  public function getConsummptionById(int $id): ?Consumption
+  {
+    $req = $this->pdo->prepare("SELECT id, drink_id, developer_name, consumed_at FROM consumptions WHERE id = :id");
+    $req->bindValue(":id", $id, PDO::PARAM_INT);
+    $req->execute();
 
-      return new Drink(
-        $id,
-        $name_drink,
-        $caffeine_mg,
-        $volume_ml
-      );
+    $r = $req->fetch();
+    if (!$r) return null;
 
-    }
+    return new Consumption(
+      (int) $r->id,
+      (int) $r->drink_id,
+      (string) $r->developer_name,
+      (string) $r->consumed_at
+    );
+  }
 
-    public function getDrinkCaffeine(int $drinkId): ?int{
-        $req = $this->pdo->prepare("SELECT caffeine_mg FROM drinks WHERE id = :id");
-        $req->bindValue(":id", $drinkId, PDO::PARAM_INT);
-        $req->execute();
+  public function createDrink(string $name_drink, int $caffeine_mg, int $volume_ml): Drink
+  {
+    $req = $this->pdo->prepare("INSERT INTO drinks(name_drink, caffeine_mg, volume_ml) VALUES(:name_drink, :caffeine_mg, :volume_ml)");
 
-        $value = $req->fetchColumn();
-        return $value === false ? null : (int) $value;
-    }
+    $req->bindValue(":name_drink", $name_drink, PDO::PARAM_STR);
+    $req->bindValue(":caffeine_mg", $caffeine_mg, PDO::PARAM_INT);
+    $req->bindValue(":volume_ml", $volume_ml, PDO::PARAM_INT);
+    $req->execute();
+    $id = (int) $this->pdo->lastInsertId();
 
-    public function getLastConsumptions(): array{
-      $req = $this->pdo->prepare("SELECT drink_id, developer_name, id, consumed_at FROM consumptions ORDER BY id DESC LIMIT 20");
+    return new Drink(
+      $id,
+      $name_drink,
+      $caffeine_mg,
+      $volume_ml
+    );
+  }
 
-      $req->execute();
-      $consumptions = $req->fetchAll(PDO::FETCH_OBJ);
+  public function getDrinkCaffeine(int $drinkId): ?int
+  {
+    $req = $this->pdo->prepare("SELECT caffeine_mg FROM drinks WHERE id = :id");
+    $req->bindValue(":id", $drinkId, PDO::PARAM_INT);
+    $req->execute();
 
-      return array_map(fn($c) => new Consumption(
-        id: (int) $c->id,
-        drinkId: (int) $c->drink_id,
-        developerName: (string) $c->developer_name,
-        consumedAt: (string) $c->consumed_at
-      ), $consumptions);
-    }
+    $value = $req->fetchColumn();
+    return $value === false ? null : (int) $value;
+  }
 
-    public function createConsumption(
-      int $drinkId,
-      string $developerName
-    ): Consumption{
-      $req = $this->pdo->prepare("INSERT INTO consumptions(drink_id, developer_name) VALUES(:drinkId, :developerName)");
-      
-      $req->bindValue(":drinkId", $drinkId, PDO::PARAM_INT);
-      $req->bindValue(":developerName", $developerName, PDO::PARAM_STR);
-      $req->execute();
+  public function getLastConsumptions(): array
+  {
+    $req = $this->pdo->prepare("SELECT drink_id, developer_name, id, consumed_at FROM consumptions ORDER BY id DESC LIMIT 20");
 
-      $id = (int) $this->pdo->lastInsertId();
+    $req->execute();
+    $consumptions = $req->fetchAll(PDO::FETCH_OBJ);
 
-      $select = $this->pdo->prepare("SELECT consumed_at FROM consumptions WHERE id = :id");
-      $select->bindValue(":id", $id, PDO::PARAM_INT);
-      $select->execute();
+    return array_map(fn($c) => new Consumption(
+      id: (int) $c->id,
+      drinkId: (int) $c->drink_id,
+      developerName: (string) $c->developer_name,
+      consumedAt: (string) $c->consumed_at
+    ), $consumptions);
+  }
 
-      return new Consumption(
-            $id,
-            $drinkId,
-            $developerName,
-            (string) $select->fetchColumn()
-        );
-    }
+  public function createConsumption(
+    int $drinkId,
+    string $developerName
+  ): Consumption {
+    $req = $this->pdo->prepare("INSERT INTO consumptions(drink_id, developer_name) VALUES(:drinkId, :developerName)");
 
-    public function caffeineCalculation(string $developerName): int{
-        $req = $this->pdo->prepare("SELECT SUM(drinks.caffeine_mg) FROM consumptions JOIN drinks ON consumptions.drink_id = drinks.id WHERE developer_name = :developerName AND DATE(consumed_at) = CURDATE()");
-        $req->bindValue(":developerName", $developerName, PDO::PARAM_STR);
-        $req->execute();
+    $req->bindValue(":drinkId", $drinkId, PDO::PARAM_INT);
+    $req->bindValue(":developerName", $developerName, PDO::PARAM_STR);
+    $req->execute();
 
-        return (int) $req->fetchColumn();
-    }
+    $id = (int) $this->pdo->lastInsertId();
+
+    $select = $this->pdo->prepare("SELECT consumed_at FROM consumptions WHERE id = :id");
+    $select->bindValue(":id", $id, PDO::PARAM_INT);
+    $select->execute();
+
+    return new Consumption(
+      $id,
+      $drinkId,
+      $developerName,
+      (string) $select->fetchColumn()
+    );
+  }
+
+  public function caffeineCalculation(string $developerName): int
+  {
+    $req = $this->pdo->prepare("SELECT SUM(drinks.caffeine_mg) FROM consumptions JOIN drinks ON consumptions.drink_id = drinks.id WHERE developer_name = :developerName AND DATE(consumed_at) = CURDATE()");
+    $req->bindValue(":developerName", $developerName, PDO::PARAM_STR);
+    $req->execute();
+
+    return (int) $req->fetchColumn();
+  }
 }
