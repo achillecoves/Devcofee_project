@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Drink;
 use App\Models\Consumption;
+use App\Models\HistoricalConsumption;
 use PDO;
 
 class CoffeeService
@@ -103,12 +104,12 @@ class CoffeeService
     $req->execute();
     $consumptions = $req->fetchAll(PDO::FETCH_OBJ);
 
-    return array_map(fn($c) => new Consumption(
+    return array_map(fn($c) => new HistoricalConsumption(
       id: (int) $c->id,
       developerName: (string) $c->developer_name,
       drinkName: (string) $c->name_drink,
       caffeineMg: (int) $c->caffeine_mg,
-      consumed_at: (string) $c->consumed_at
+      consumedAt: (string) $c->consumed_at
     ), $consumptions);
   }
 

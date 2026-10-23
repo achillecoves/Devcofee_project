@@ -34,6 +34,41 @@ export function useHistoricalConsumptions() {
         }
     }
 
+    async function deleteConsumption(consumptionId: number): Promise<boolean> {
+        error.value = null
+
+        try {
+            const response = await fetch(`${urlBase}/consumptions/${consumptionId}`, {
+                method: 'DELETE'
+            })
+
+            if (!response.ok) {
+                const text = await response.text()
+                error.value = text
+                    ? JSON.parse(text)
+                    : {
+                        type: 'about:blank',
+                        title: response.statusText || 'Erreur',
+                        status: response.status,
+                        detail: 'La suppression a échoué.'
+                    }
+                return false
+            }
+
+            removeConsumption(consumptionId)
+            return true
+        }
+        catch {
+            error.value = {
+                type: 'about:blank',
+                title: 'Network Error',
+                status: 0,
+                detail: "Impossible de contacter l'API."
+            }
+            return false
+        }
+    }
+
     function removeConsumption(consumptionId: number): void {
         consumptions.value = consumptions.value.filter(c => c.id !== consumptionId)
     }
@@ -43,6 +78,7 @@ export function useHistoricalConsumptions() {
         loading,
         error,
         loadConsumptions,
+        deleteConsumption,
         removeConsumption
     }
 }

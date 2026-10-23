@@ -1,13 +1,19 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import { useHistoricalConsumptions } from '../composables/useHistoricalConsumptions'
+import ConsumptionDisplay from '@/_shared/components/ConsumptionDisplay.vue'
 
-const { consumptions, loadConsumptions, removeConsumption } = useHistoricalConsumptions()
+const { consumptions, loadConsumptions, deleteConsumption } = useHistoricalConsumptions()
+
+onMounted(() => {
+  loadConsumptions()
+})
 </script>
 
 <template>  
     <ul>
         <li v-for="consumption in consumptions" :key="consumption.id">
-            <ConsumptionDisplay :consumption="consumption" @delete="removeConsumption(consumption.id)" />
+            <ConsumptionDisplay :consumption="consumption" @delete="deleteConsumption(consumption.id)" />
         </li>
     </ul>
 </template>
