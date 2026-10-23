@@ -1,6 +1,7 @@
 <?php
 
 use App\Controllers\DrinkController;
+use App\Controllers\ConsumptionController;
 use App\Core\Database;
 use DI\ContainerBuilder;
 use Dotenv\Dotenv;
