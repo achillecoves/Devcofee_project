@@ -116,7 +116,7 @@ Le dossier `frontend/` est déjà présent dans le dépôt. Depuis la racine du 
 ```bash
 cd frontend
 bun install
-bun dev
+bun run dev
 ```
  
 L'application est disponible sur `http://localhost:5173`.
