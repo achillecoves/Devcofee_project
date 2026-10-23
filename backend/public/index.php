@@ -8,6 +8,14 @@ use Dotenv\Dotenv;
 use Slim\Factory\AppFactory;
 use App\Middlewares\CorsMiddleware;
 use App\Middlewares\EcoMetricsMiddleware;
+use App\Middlewares\ErrorHandlingMiddleware;
+use App\Responses\ProblemDetailsResponse;
+use Monolog\Handler\StreamHandler;
+use Monolog\Level;
+use Monolog\Logger;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Log\LoggerInterface;
+use Slim\Exception\HttpException;
 
 require_once "../vendor/autoload.php";
 
@@ -21,6 +29,12 @@ $containerBuilder->useAutowiring(true);
 $containerBuilder->addDefinitions([
   PDO::class => function(){
     return Database::getInstance();
+  },
+
+  LoggerInterface::class => function(){
+    $logger = new Logger("devcoffee");
+    $logger->pushHandler(new StreamHandler(__DIR__ . "/../src/var/logs/app.log", Level::Debug));
+    return $logger;
   }
 ]);
 
@@ -28,9 +42,17 @@ $container = $containerBuilder->build();
 AppFactory::setContainer($container);
 
 $app = AppFactory::create();
+
+$logger = $container->get(LoggerInterface::class);
+
+$app->addRoutingMiddleware();
+$app->addBodyParsingMiddleware();
+
+//Error Middleware
+$app->add(new ErrorHandlingMiddleware($app->getResponseFactory(), $logger));
+
 $app->add(new EcoMetricsMiddleware());
 $app->add(new CorsMiddleware);
-$app->addBodyParsingMiddleware();
 
 $app->options("/{routes:.+}", function ($request, $response){
   return $response;
@@ -38,7 +60,8 @@ $app->options("/{routes:.+}", function ($request, $response){
 
 $app->get("/api/drinks", [DrinkController::class, "index"]);
 $app->post("/api/drinks", [DrinkController::class, "storeDrink"]);
-$app->get("/api/drinks/{id:[0-9]+}", [DrinkController::class, "show"]);
+$app->get("/api/drinks/{id:[0-9]+}", [DrinkController::class, "showDrinks"]);
+
 $app->get("/api/consumptions", [ConsumptionController::class, "index"]);
 $app->post("/api/consumptions", [ConsumptionController::class, "store"]);
 
