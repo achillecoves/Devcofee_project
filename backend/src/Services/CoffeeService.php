@@ -92,16 +92,23 @@ class CoffeeService
 
   public function getLastConsumptions(): array
   {
-    $req = $this->pdo->prepare("SELECT drink_id, developer_name, id, consumed_at, drinks.name_drink, drinks.caffeine_mg FROM consumptions JOIN drinks ON consumptions.drink_id = drinks.id ORDER BY id DESC LIMIT 20");
-
+    $req = $this->pdo->prepare("
+    SELECT consumptions.id, consumptions.drink_id, consumptions.developer_name,
+       consumptions.consumed_at, drinks.name_drink, drinks.caffeine_mg
+    FROM consumptions
+    JOIN drinks ON consumptions.drink_id = drinks.id
+    ORDER BY consumptions.id DESC
+    LIMIT 20;");
+    
     $req->execute();
     $consumptions = $req->fetchAll(PDO::FETCH_OBJ);
 
     return array_map(fn($c) => new Consumption(
       id: (int) $c->id,
-      drinkId: (int) $c->drink_id,
       developerName: (string) $c->developer_name,
-      consumedAt: (string) $c->consumed_at
+      drinkName: (string) $c->name_drink,
+      caffeineMg: (int) $c->caffeine_mg,
+      consumed_at: (string) $c->consumed_at
     ), $consumptions);
   }
 

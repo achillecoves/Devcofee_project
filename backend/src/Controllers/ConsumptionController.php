@@ -21,15 +21,20 @@ class ConsumptionController
         $consumptions = $this->coffeeService->getLastConsumptions();
         $baseUrl = UrlHelper::getBaseUrl($request);
 
-        $data = array_map(fn($s) => [
-            "id" => $s->id,
-            "drinkId" => $s->drinkId,
-            "developerName" => $s->developerName,
-            "consumedAt" => $s->consumedAt,
+        $data = array_map(fn($c) => [
+            "id" => $c->id,
+            "developerName" => $c->developerName,
+            "drinkName" => $c->drinkName,
+            "caffeineMg" => $c->caffeineMg,
+            "consumedAt" => $c->consumedAt,
             "_links" => [
                 "self" => [
-                    "href" => "{$baseUrl}/api/consumptions/{$s->id}",
+                    "href" => "{$baseUrl}/api/consumptions/{$c->id}",
                     "method" => "GET"
+                ],
+                "delete" => [
+                    "href" => "{$baseUrl}/api/consumptions/{$c->id}",
+                    "method" => "DELETE"
                 ]
             ]
         ], $consumptions);
