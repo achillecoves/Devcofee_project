@@ -119,7 +119,7 @@ bun install
 bun run dev
 ```
  
-L'application est disponible sur `http://localhost:5173`.
+L'application est disponible sur `http://localhost:5500`.
  
 Le back-end doit être lancé en parallèle, et son `CorsMiddleware` doit autoriser l'origine du front.
  
