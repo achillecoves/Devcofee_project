@@ -1,12 +1,12 @@
 <?php
 
-use App\Controllers\StationController;
+use App\Controllers\DrinkController;
 use App\Core\Database;
-use App\Middlewares\CorsMiddleware;
-use App\Middlewares\EcoMetricsMiddleware;
 use DI\ContainerBuilder;
 use Dotenv\Dotenv;
 use Slim\Factory\AppFactory;
+use App\Middlewares\CorsMiddleware;
+use App\Middlewares\EcoMetricsMiddleware;
 
 require_once "../vendor/autoload.php";
 
@@ -25,3 +25,18 @@ $containerBuilder->addDefinitions([
 
 $container = $containerBuilder->build();
 AppFactory::setContainer($container);
+
+$app = AppFactory::create();
+$app->add(new EcoMetricsMiddleware());
+$app->add(new CorsMiddleware);
+$app->addBodyParsingMiddleware();
+
+$app->options("/{routes:.+}", function ($request, $response){
+  return $response;
+});
+
+$app->get("/api/drinks", [DrinkController::class, "index"]);
+$app->post("/api/drinks", [DrinkController::class, "storeDrink"]);
+$app->get("/api/drinks/{id:[0-9]+}", [DrinkController::class, "show"]);
+
+$app->run();

@@ -14,13 +14,13 @@ class CoffeeService{
     public function getAllDrinks()
     {
 
-        $req = $this->pdo->query("SELECT id, drinks.name, caffeine_mg, volume_ml FROM drinks");
+        $req = $this->pdo->query("SELECT id, name_drink, caffeine_mg, volume_ml FROM drinks");
 
         $rows = $req->fetchAll();
 
         return array_map(fn($r) => new Drink(
             (int) $r->id,
-            $r->name,
+            $r->name_drink,
             (int) $r->caffeine_mg,
             (int) $r->volume_ml
         ), $rows);
@@ -28,7 +28,7 @@ class CoffeeService{
 
     public function getDrinkById(int $id): ?Drink
     {
-      $req = $this->pdo->prepare("SELECT id, name_drink, caffeine_mg, volume_ml FROM drinks");
+      $req = $this->pdo->prepare("SELECT id, name_drink, caffeine_mg, volume_ml FROM drinks WHERE id = :id");
       $req->bindValue(":id", $id, PDO::PARAM_INT);
       $req->execute();
 
@@ -37,7 +37,7 @@ class CoffeeService{
 
       return new Drink(
         (int) $r->id,
-        $r->name,
+        $r->name_drink,
         (int) $r->caffeine_mg,
         (int) $r->volume_ml
       );

@@ -9,3 +9,4 @@ schema.sql
 
 #logs
 logs
+src/var/logs/
