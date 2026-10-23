@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controllers;
 
 use App\Services\CoffeeService;
@@ -8,17 +9,18 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Routing\RouteContext;
 use App\Core\UrlHelper;
 
-class ConsumptionController{
+class ConsumptionController
+{
 
     public function __construct(
         private CoffeeService $coffeeService
-    ){}
+    ) {}
 
     public function index(Request $request, Response $response): Response
     {
         $consumptions = $this->coffeeService->getLastConsumptions();
         $baseUrl = UrlHelper::getBaseUrl($request);
-        
+
         $data = array_map(fn($s) => [
             "id" => $s->id,
             "drinkId" => $s->drinkId,
@@ -49,7 +51,7 @@ class ConsumptionController{
             );
         }
 
-         $drinkCaffeine = $this->coffeeService->getDrinkCaffeine((int) $body["drinkId"]);
+        $drinkCaffeine = $this->coffeeService->getDrinkCaffeine((int) $body["drinkId"]);
         if ($drinkCaffeine === null) {
             return ProblemDetailsResponse::create(
                 response: $response,
